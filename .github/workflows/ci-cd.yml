@@ -14,6 +14,7 @@ jobs:
 
   build:
     needs: security
+
     uses: ./.github/workflows/reusable-build.yml
 
     with:
@@ -25,13 +26,12 @@ jobs:
 
   deploy:
     needs: build
+
     uses: ./.github/workflows/reusable-deploy.yml
 
     with:
       aws_region: ${{ vars.AWS_REGION }}
       eks_cluster: ${{ vars.EKS_CLUSTER }}
       namespace: ${{ vars.K8S_NAMESPACE }}
-      ecr_repository: ${{ vars.ECR_REPOSITORY }}
-      image_tag: ${{ github.sha }}
 
     secrets: inherit
