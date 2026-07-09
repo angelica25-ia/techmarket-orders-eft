@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: orders
-        image: IMAGE_URI
+        image: 219964029915.dkr.ecr.us-east-1.amazonaws.com/techmarket-orders:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
