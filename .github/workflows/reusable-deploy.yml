@@ -1,0 +1,71 @@
+name: Reusable Deploy
+
+on:
+  workflow_call:
+    inputs:
+      aws_region:
+        required: true
+        type: string
+      eks_cluster:
+        required: true
+        type: string
+      namespace:
+        required: true
+        type: string
+
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_SESSION_TOKEN:
+        required: true
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Configure kubectl
+        uses: aws-actions/eks-set-context@v4
+        with:
+          cluster-name: ${{ inputs.eks_cluster }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Deploy Base Resources
+        run: |
+          kubectl apply -f k8s/base/
+
+      - name: Deploy Green Version
+        run: |
+          kubectl apply -f k8s/green/
+
+      - name: Health Validation
+        run: |
+          kubectl rollout status deployment/techmarket-green \
+          -n ${{ inputs.namespace }} --timeout=180s
+
+      - name: Switch Traffic Blue -> Green
+        run: |
+          kubectl patch service techmarket-service \
+          -n ${{ inputs.namespace }} \
+          -p '{"spec":{"selector":{"app":"techmarket-orders","version":"green"}}}'
+
+      - name: Automatic Rollback
+        if: failure()
+        run: |
+          kubectl patch service techmarket-service \
+          -n ${{ inputs.namespace }} \
+          -p '{"spec":{"selector":{"app":"techmarket-orders","version":"blue"}}}'

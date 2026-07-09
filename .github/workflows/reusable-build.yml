@@ -13,26 +13,56 @@ on:
         required: true
         type: string
 
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_SESSION_TOKEN:
+        required: true
+
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
 
     steps:
-      - name: Checkout del código
-        uses: actions/checkout@v4
 
-      - name: Configurar Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Instalar dependencias
+      - name: Install dependencies
         working-directory: app
         run: npm ci
 
-      - name: Ejecutar pruebas
+      - name: Run tests
         working-directory: app
         run: npm test
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Login Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker Image
+        run: |
+          docker build \
+            -t ${{ inputs.ecr_repository }}:${{ inputs.image_tag }} \
+            .
+
+      - name: Push Docker Image
+        run: |
+          docker push \
+            ${{ inputs.ecr_repository }}:${{ inputs.image_tag }}

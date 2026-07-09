@@ -1,0 +1,37 @@
+name: TechMarket CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+
+  security:
+    uses: ./.github/workflows/reusable-security.yml
+
+  build:
+    needs: security
+
+    uses: ./.github/workflows/reusable-build.yml
+
+    with:
+      aws_region: ${{ vars.AWS_REGION }}
+      ecr_repository: ${{ vars.ECR_REPOSITORY }}
+      image_tag: ${{ github.sha }}
+
+    secrets: inherit
+
+  deploy:
+    needs: build
+
+    uses: ./.github/workflows/reusable-deploy.yml
+
+    with:
+      aws_region: ${{ vars.AWS_REGION }}
+      eks_cluster: ${{ vars.EKS_CLUSTER }}
+      namespace: ${{ vars.K8S_NAMESPACE }}
+
+    secrets: inherit

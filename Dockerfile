@@ -2,24 +2,23 @@ FROM node:20-slim AS build
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY app/package*.json ./
 
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
-COPY index.js ./
+COPY app/ ./
 
-FROM node:20-slim AS production
-
-ARG BUILD_COLOR="Blue"
-ENV NODE_ENV production
-
-ENV APP_COLOR $BUILD_COLOR 
+FROM node:20-slim
 
 WORKDIR /app
 
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/index.js ./
+ARG BUILD_COLOR="Blue"
+
+ENV NODE_ENV=production
+ENV APP_COLOR=$BUILD_COLOR
+
+COPY --from=build /app .
 
 EXPOSE 3000
 
-CMD ["node", "index.js"]
+CMD ["npm", "start"]
