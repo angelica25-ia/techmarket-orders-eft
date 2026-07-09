@@ -12,7 +12,7 @@ FROM node:20-slim
 
 WORKDIR /app
 
-ARG BUILD_COLOR="Blue"
+ARG BUILD_COLOR="Green"
 
 ENV NODE_ENV=production
 ENV APP_COLOR=$BUILD_COLOR
