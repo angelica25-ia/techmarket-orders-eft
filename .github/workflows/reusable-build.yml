@@ -23,14 +23,12 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
 
     steps:
-
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
@@ -54,7 +52,11 @@ jobs:
           aws-region: ${{ inputs.aws_region }}
 
       - name: Login Amazon ECR
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Verify AWS Identity
+        run: aws sts get-caller-identity
 
       - name: Build Docker Image
         run: |

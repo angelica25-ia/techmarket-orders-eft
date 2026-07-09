@@ -39,31 +39,30 @@ jobs:
           aws-region: ${{ inputs.aws_region }}
 
       - name: Configure kubectl
-        uses: aws-actions/eks-set-context@v4
-        with:
-          cluster-name: ${{ inputs.eks_cluster }}
-          aws-region: ${{ inputs.aws_region }}
-
-      - name: Deploy Base Resources
         run: |
-          kubectl apply -f k8s/base/
+          aws eks update-kubeconfig \
+            --region ${{ inputs.aws_region }} \
+            --name ${{ inputs.eks_cluster }}
 
-      - name: Deploy Green Version
-        run: |
-          kubectl apply -f k8s/green/
+      - name: Deploy Base
+        run: kubectl apply -f k8s/base/
 
-      - name: Health Validation
+      - name: Deploy Green
+        run: kubectl apply -f k8s/green/
+
+      - name: Health Check
         run: |
           kubectl rollout status deployment/techmarket-green \
-          -n ${{ inputs.namespace }} --timeout=180s
+            -n ${{ inputs.namespace }} \
+            --timeout=180s
 
-      - name: Switch Traffic Blue -> Green
+      - name: Switch Traffic
         run: |
           kubectl patch service techmarket-service \
           -n ${{ inputs.namespace }} \
           -p '{"spec":{"selector":{"app":"techmarket-orders","version":"green"}}}'
 
-      - name: Automatic Rollback
+      - name: Rollback
         if: failure()
         run: |
           kubectl patch service techmarket-service \
