@@ -23,11 +23,9 @@ on:
 
 jobs:
   deploy:
-
     runs-on: ubuntu-latest
 
     steps:
-
       - uses: actions/checkout@v4
 
       - name: Configure AWS Credentials
@@ -44,11 +42,28 @@ jobs:
             --region ${{ inputs.aws_region }} \
             --name ${{ inputs.eks_cluster }}
 
-      - name: Deploy Base
-        run: kubectl apply -f k8s/base/
+      - name: Create Namespace
+        run: |
+          kubectl apply -f k8s/base/namespace.yaml
+
+      - name: Wait Namespace
+        run: sleep 5
+
+      - name: Deploy ConfigMap
+        run: |
+          kubectl apply -f k8s/base/configmap.yaml
+
+      - name: Deploy Service
+        run: |
+          kubectl apply -f k8s/base/service.yaml
+
+      - name: Deploy Blue
+        run: |
+          kubectl apply -f k8s/blue/
 
       - name: Deploy Green
-        run: kubectl apply -f k8s/green/
+        run: |
+          kubectl apply -f k8s/green/
 
       - name: Health Check
         run: |
@@ -59,12 +74,12 @@ jobs:
       - name: Switch Traffic
         run: |
           kubectl patch service techmarket-service \
-          -n ${{ inputs.namespace }} \
-          -p '{"spec":{"selector":{"app":"techmarket-orders","version":"green"}}}'
+            -n ${{ inputs.namespace }} \
+            -p '{"spec":{"selector":{"app":"techmarket-orders","version":"green"}}}'
 
       - name: Rollback
         if: failure()
         run: |
           kubectl patch service techmarket-service \
-          -n ${{ inputs.namespace }} \
-          -p '{"spec":{"selector":{"app":"techmarket-orders","version":"blue"}}}'
+            -n ${{ inputs.namespace }} \
+            -p '{"spec":{"selector":{"app":"techmarket-orders","version":"blue"}}}'
