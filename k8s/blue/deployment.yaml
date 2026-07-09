@@ -16,7 +16,7 @@ spec:
     metadata:
       labels:
         app: techmarket-orders
-        version: blue
+        version: green
     spec:
       containers:
       - name: orders
