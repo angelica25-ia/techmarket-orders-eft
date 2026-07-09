@@ -5,7 +5,7 @@ metadata:
   namespace: techmarket
   labels:
     app: techmarket-orders
-    version: blue
+    version: green
 spec:
   replicas: 2
   selector:
