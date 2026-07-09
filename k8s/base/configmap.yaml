@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: techmarket-config
+  namespace: techmarket
+data:
+  APP_NAME: "TechMarket Orders"
+  APP_ENV: "production"
+  FEATURE_X_ENABLED: "false"
+  UI_COLOR: "blue"
