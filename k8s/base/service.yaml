@@ -3,11 +3,13 @@ kind: Service
 metadata:
   name: techmarket-service
   namespace: techmarket
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
 spec:
   type: LoadBalancer
   selector:
     app: techmarket-orders
-    version: blue
+    version: green
   ports:
     - protocol: TCP
       port: 80
