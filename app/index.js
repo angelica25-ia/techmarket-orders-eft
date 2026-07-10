@@ -44,7 +44,7 @@ function greet(name) {
     const appColor = process.env.APP_COLOR || "Mundo";
 
     if (!name) {
-        return `TechMarket Orders - ${appColor}`;
+        return `TechMarket Orders DEMO - ${appColor}`;
     }
 
     return `Hola ${name}, bienvenido a TechMarket Orders (${appColor})`;
