@@ -12,3 +12,5 @@ Repositorio desarrollado para el Examen Final Transversal del módulo Evaluació
 - Kubernetes
 
 > La documentación completa será incorporada durante el desarrollo del proyecto.
+
+Última validación de despliegue: LIVE DEMO
