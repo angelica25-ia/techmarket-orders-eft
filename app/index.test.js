@@ -17,7 +17,7 @@ describe('Función greet()', () => {
     test('Debe devolver el saludo por defecto', () => {
 
         expect(greet())
-            .toBe("TechMarket Orders - Mundo");
+            .toBe("TechMarket Orders DEMO - Mundo");
 
     });
 
